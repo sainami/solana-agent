@@ -33,7 +33,7 @@ class YieldQuerier(FunctionWrapper[YieldQueryArgs, YieldQueryResult]):
 
     @classmethod
     def description(cls) -> LiteralString:
-        return "useful when you want to query yielding data of some web3 protocol, project or blockchain"
+        return "query yielding data of protocol built on Solana"
 
     @classmethod
     def notification(cls) -> str:

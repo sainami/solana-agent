@@ -25,7 +25,7 @@ class TVLQuerier(FunctionWrapper[TVLQueryArgs, TVLQueryResult]):
 
     @classmethod
     def description(cls) -> LiteralString:
-        return "useful when you want to query TVL data of some web3 protocol, project or blockchain"
+        return "query TVL data of protocol built on Solana"
 
     @classmethod
     def notification(cls) -> str:

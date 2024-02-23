@@ -27,7 +27,7 @@ class TokenLister(FunctionWrapper[ListingArgs, ListingResult]):
 
     @classmethod
     def description(cls) -> LiteralString:
-        return "useful for when you want to list reliable tokens on Solana"
+        return "list the reliable tokens on Solana"
 
     @classmethod
     def notification(cls) -> str:

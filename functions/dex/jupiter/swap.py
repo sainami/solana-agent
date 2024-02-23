@@ -55,7 +55,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
 
     @classmethod
     def description(cls) -> LiteralString:
-        return "useful when you want to build a swap transaction on Jupiter for a user"
+        return "create a swap transaction when user want to swap tokens on Solana"
 
     @classmethod
     def notification(cls) -> str:

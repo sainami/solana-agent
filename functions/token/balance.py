@@ -69,7 +69,7 @@ class BalanceGetter(FunctionWrapper[BalanceArgs, BalanceResult]):
 
     @classmethod
     def description(cls) -> LiteralString:
-        return "useful for when you query some token balance on Solana"
+        return "get token balance of the wallet on Solana"
 
     @classmethod
     def notification(cls) -> str:

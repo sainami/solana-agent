@@ -52,7 +52,7 @@ class RoutingQuerier(FunctionWrapper[RoutingQueryArgs, RoutingResult]):
 
     @classmethod
     def description(cls) -> LiteralString:
-        return "useful for when query the routing simulation for swapping token on Solana"
+        return "find the best routing for swapping tokens on Solana"
 
     @classmethod
     def notification(cls) -> str:

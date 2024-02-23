@@ -25,7 +25,7 @@ class PriceQuerier(FunctionWrapper[PriceQueryArgs, PriceResult]):
 
     @classmethod
     def description(cls) -> LiteralString:
-        return "useful when you want to query the best price of tokens on Solana DEXes"
+        return "find the best price of tokens on Solana DEXes"
 
     @classmethod
     def notification(cls) -> str:
