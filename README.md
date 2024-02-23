@@ -10,8 +10,6 @@ pip install -U langchain-experimental
 pip install -U langchain-community
 pip install -U langchain-openai
 pip install tavily-python
-pip install httpx
-pip install openai
 pip install solana
 pip install solders
 pip install fastapi
