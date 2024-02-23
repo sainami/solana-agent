@@ -9,7 +9,7 @@ from common.response import BaseResponse
 
 class StreamingResponse(BaseResponse):
     content: Optional[str] = None
-    metadata: Optional[BaseModel] = None
+    metadata: Optional[Any] = None
 
 
 class StreamingCallbackHandler(AsyncCallbackHandler):
@@ -36,7 +36,7 @@ class StreamingCallbackHandler(AsyncCallbackHandler):
     async def send_error(self, err: str):
         await self._queue.put(StreamingResponse(status=False, error=err))
 
-    async def send_metadata(self, metadata: BaseModel):
+    async def send_metadata(self, metadata: Any):
         await self._queue.put(StreamingResponse(status=True, metadata=metadata))
 
     async def stop(self):

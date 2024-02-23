@@ -119,18 +119,6 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 raise RuntimeError(
                     f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                 )
-            # if callbacks:
-            #
-            #
-            #
-            #
-            #     handle_event(
-            #         callbacks.inheritable_handlers,
-            #         "send_metadata",
-            #         None,
-            #         SwapTransaction.parse_obj(resp.json()),
-            #     )
-
             data: dict = resp.json()
             return SwapTxResult(
                 raw_tx=data["swapTransaction"],
@@ -180,15 +168,6 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                     raise RuntimeError(
                         f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                     )
-                # if callbacks:
-                #     logging.info("================= send metadata ================")
-                #     await ahandle_event(
-                #         callbacks.inheritable_handlers,
-                #         "send_metadata",
-                #         None,
-                #         SwapTransaction.parse_obj(resp.json()),
-                #     )
-
                 data: dict = resp.json()
                 return SwapTxResult(
                     raw_tx=data["swapTransaction"],

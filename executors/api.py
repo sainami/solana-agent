@@ -21,11 +21,12 @@ def register_agent_api(chatter: Chatter) -> APIRouter:
 
         async def _chatting():
             try:
-                await chatter.chat(
+                output = await chatter.chat(
                     question,
                     chat_history,
                     config={"callbacks": [callback_handler]}
                 )
+                await callback_handler.send_metadata(output)
             except Exception as e:
                 await callback_handler.send_error(repr(e))
             finally:
