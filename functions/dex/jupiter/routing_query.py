@@ -138,11 +138,7 @@ class RoutingQuerier(FunctionWrapper[RoutingQueryArgs, RoutingResult]):
         ) -> RoutingResult:
             """Query routing information from the routing service."""
             token_in = self.chain_config.get_token(token_in_symbol, None, wrap=True)
-            if not token_in:
-                raise ValueError(f"Input token not found: {token_in_symbol}")
             token_out = self.chain_config.get_token(token_out_symbol, None, wrap=True)
-            if not token_out:
-                raise ValueError(f"Output token not found: {token_out_symbol}")
             resp = http_get(
                 self.base_url + "/quote",
                 params=self._create_params(
@@ -168,12 +164,8 @@ class RoutingQuerier(FunctionWrapper[RoutingQueryArgs, RoutingResult]):
         ) -> RoutingResult:
             """Query routing information from the routing service."""
             async with AsyncClient() as client:
-                token_in = self.chain_config.get_token(token_in_symbol, None)
-                if not token_in:
-                    raise ValueError(f"Input token not found: {token_in_symbol}")
-                token_out = self.chain_config.get_token(token_out_symbol, None)
-                if not token_out:
-                    raise ValueError(f"Output token not found: {token_out_symbol}")
+                token_in = self.chain_config.get_token(token_in_symbol, None, wrap=True)
+                token_out = self.chain_config.get_token(token_out_symbol, None, wrap=True)
                 resp = await client.get(
                     self.base_url + "/quote",
                     params=self._create_params(
