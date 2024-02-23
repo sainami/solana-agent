@@ -91,10 +91,10 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             callbacks: Optional[CallbackManager] = None,
         ) -> SwapTxResult:
             """Build a swap transaction for a user to swap tokens on Jupiter"""
-            token_in = self.chain_config.get_token(token_in_symbol, None)
+            token_in = self.chain_config.get_token(token_in_symbol, None, wrap=True)
             if not token_in:
                 raise ValueError(f"Input token not found: {token_in_symbol}")
-            token_out = self.chain_config.get_token(token_out_symbol, None)
+            token_out = self.chain_config.get_token(token_out_symbol, None, wrap=True)
             if not token_out:
                 raise ValueError(f"Output token not found: {token_out_symbol}")
             resp = http_get(

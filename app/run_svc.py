@@ -55,7 +55,7 @@ async def main():
     from executors.api import register_agent_api
     from functions.token import BalanceGetter, TokenLister
     from functions.defillama import TVLQuerier, YieldQuerier
-    from functions.dex.jupiter import SwapTxBuilder, RoutingQuerier, PriceQuerier
+    from functions.dex.jupiter import SwapTxBuilder, PriceQuerier
     from config import ChainConfig, ModelConfig
 
     model_config = ModelConfig.from_file(Path(args.model_config))
@@ -77,7 +77,6 @@ async def main():
     tvl_querier = TVLQuerier()
     yield_querier = YieldQuerier()
     swap_tx_builder = SwapTxBuilder(chain_config=chain_config)
-    # routing_querier = RoutingQuerier(chain_config=chain_config)
     price_querier = PriceQuerier()
     python_tool = PythonAstREPLTool(
         metadata={"notification": "\n*Running Python code...*\n"},
@@ -95,7 +94,6 @@ async def main():
             tvl_querier.tool(),
             yield_querier.tool(),
             swap_tx_builder.tool(),
-            # routing_querier.tool(),
             price_querier.tool(),
             python_tool,
             tavily_tool,
