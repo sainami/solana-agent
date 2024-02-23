@@ -123,7 +123,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 )
             if callbacks:
                 handle_event(
-                    callbacks.inheritable_handlers,
+                    callbacks.handlers,
                     "send_metadata",
                     None,
                     SwapTransaction.parse_obj(resp.json()),
@@ -177,7 +177,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 if callbacks:
                     logging.info("================= send metadata ================")
                     await ahandle_event(
-                        callbacks.inheritable_handlers,
+                        callbacks.handlers,
                         "send_metadata",
                         None,
                         SwapTransaction.parse_obj(resp.json()),
