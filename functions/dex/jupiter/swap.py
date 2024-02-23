@@ -1,5 +1,3 @@
-import logging
-
 from httpx import get as http_get, post as http_post, AsyncClient
 from typing import Any, Union, Literal, LiteralString, Mapping, Optional, Callable, Awaitable
 from pydantic.v1 import BaseModel, Field, validator
@@ -31,13 +29,15 @@ class SwapTxArgs(BaseModel):
 
 
 class SwapTxResult(BaseModel):
-    prompt: str = Field(description="Prompt message for the user to confirm the swap transaction")
+    raw_tx: str = Field(description="Swap transaction encoded in base64")
+    last_valid_height: int = Field(description="Last valid block height")
+    priority_fee: int = Field(description="Priority fee in lamports")
 
 
-class SwapTransaction(BaseModel):
-    tx: str = Field(alias="swapTransaction")
-    last_valid_height: int = Field(alias="lastValidBlockHeight")
-    priority_fee_lamports: int = Field(alias="prioritizationFeeLamports")
+# class SwapTransaction(BaseModel):
+#     tx: str = Field(alias="swapTransaction")
+#     last_valid_height: int = Field(alias="lastValidBlockHeight")
+#     priority_fee_lamports: int = Field(alias="prioritizationFeeLamports")
 
 
 class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
@@ -131,7 +131,12 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             #         SwapTransaction.parse_obj(resp.json()),
             #     )
 
-            return SwapTxResult(prompt="Please approve the swap transaction")
+            data: dict = resp.json()
+            return SwapTxResult(
+                raw_tx=data["swapTransaction"],
+                last_valid_height=data["lastValidBlockHeight"],
+                priority_fee=data["prioritizationFeeLamports"],
+            )
 
         return _build_swap_tx
 
@@ -184,6 +189,11 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 #         SwapTransaction.parse_obj(resp.json()),
                 #     )
 
-                return SwapTxResult(prompt="Please approve the swap transaction")
+                data: dict = resp.json()
+                return SwapTxResult(
+                    raw_tx=data["swapTransaction"],
+                    last_valid_height=data["lastValidBlockHeight"],
+                    priority_fee=data["prioritizationFeeLamports"],
+                )
 
         return _build_swap_tx
