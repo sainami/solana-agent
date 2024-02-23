@@ -45,6 +45,7 @@ class Chatter:
         question: str,
         chat_history: List[Tuple[str, str]],
         config: Optional[RunnableConfig] = None,
+        **kwargs,
     ) -> str:
         result = await self.agent.ainvoke(
             {
@@ -52,5 +53,6 @@ class Chatter:
                 "messages": self._create_messages(chat_history),
             },
             config=config,
+            **kwargs,
         )
         return result["output"]

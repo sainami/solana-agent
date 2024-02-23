@@ -4,7 +4,6 @@ from httpx import get as http_get, post as http_post, AsyncClient
 from typing import Any, Union, Literal, LiteralString, Mapping, Optional, Callable, Awaitable
 from pydantic.v1 import BaseModel, Field, validator
 from solders.pubkey import Pubkey
-from langchain_core.callbacks.manager import CallbackManager, AsyncCallbackManager, handle_event, ahandle_event
 
 from functions.wrapper import FunctionWrapper
 from config.chain import ChainConfig, TokenMetadata
@@ -90,7 +89,6 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             token_in_symbol: str,
             token_out_symbol: str,
             slippage_bps: float = 0.5,
-            callbacks: Optional[CallbackManager] = None,
         ) -> SwapTxResult:
             """Build a swap transaction for a user to swap tokens on Jupiter"""
             token_in = self.chain_config.get_token(token_in_symbol, None, wrap=True)
@@ -121,13 +119,17 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 raise RuntimeError(
                     f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                 )
-            if callbacks:
-                handle_event(
-                    callbacks.handlers,
-                    "send_metadata",
-                    None,
-                    SwapTransaction.parse_obj(resp.json()),
-                )
+            # if callbacks:
+            #
+            #
+            #
+            #
+            #     handle_event(
+            #         callbacks.inheritable_handlers,
+            #         "send_metadata",
+            #         None,
+            #         SwapTransaction.parse_obj(resp.json()),
+            #     )
 
             return SwapTxResult(prompt="Please approve the swap transaction")
 
@@ -142,7 +144,6 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             token_in_symbol: str,
             token_out_symbol: str,
             slippage_bps: float = 0.5,
-            callbacks: Optional[AsyncCallbackManager] = None,
         ) -> SwapTxResult:
             """Build a swap transaction for a user to swap tokens on Jupiter"""
             async with AsyncClient() as client:
@@ -174,14 +175,14 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                     raise RuntimeError(
                         f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                     )
-                if callbacks:
-                    logging.info("================= send metadata ================")
-                    await ahandle_event(
-                        callbacks.handlers,
-                        "send_metadata",
-                        None,
-                        SwapTransaction.parse_obj(resp.json()),
-                    )
+                # if callbacks:
+                #     logging.info("================= send metadata ================")
+                #     await ahandle_event(
+                #         callbacks.inheritable_handlers,
+                #         "send_metadata",
+                #         None,
+                #         SwapTransaction.parse_obj(resp.json()),
+                #     )
 
                 return SwapTxResult(prompt="Please approve the swap transaction")
 

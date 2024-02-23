@@ -183,9 +183,7 @@ class FunctionWrapper(Generic[Input, Output]):
             description=self.description(),
             return_direct=self.return_direct,
             args_schema=self.input_type(),
-            metadata={
-                "notification": self.notification()
-            },
+            metadata={"notification": self.notification()},
             handle_tool_error=True,
             **kwargs,
         )
