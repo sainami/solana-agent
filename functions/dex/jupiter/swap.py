@@ -12,9 +12,9 @@ class SwapTxArgs(BaseModel):
     user_address: str = Field(description="Address or public-key of the user")
     amount: float = Field(description="Amount of the token to swap in or swap out")
     swap_mode: Union[Literal["ExactIn"], Literal["ExactOut"]] = Field(description="Type of the swap transaction")
-    slippage_bps: float = Field(0.5, description="Slippage percentage tolerance")
     token_in_symbol: str = Field(description="Symbol of the token to swap in")
     token_out_symbol: str = Field(description="Symbol of the token to swap out")
+    slippage_bps: float = Field(0.5, description="Slippage percentage tolerance")
 
     @validator("user_address", pre=True)
     @classmethod
