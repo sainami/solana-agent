@@ -30,7 +30,7 @@ class SwapTxArgs(BaseModel):
 
 
 class SwapTxResult(BaseModel):
-    prompt: LiteralString = Field(description="Prompt message for the user to confirm the swap transaction")
+    prompt: str = Field(description="Prompt message for the user to confirm the swap transaction")
 
 
 class SwapTransaction(BaseModel):
