@@ -24,9 +24,7 @@ def register_agent_api(chatter: Chatter) -> APIRouter:
                 await chatter.chat(
                     question,
                     chat_history,
-                    config={
-                        "callbacks": [callback_handler]
-                    }
+                    config={"callbacks": [callback_handler]}
                 )
             except Exception as e:
                 await callback_handler.send_error(repr(e))
