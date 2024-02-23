@@ -30,7 +30,7 @@ class SwapTxArgs(BaseModel):
 
 
 class SwapTxResult(BaseModel):
-    prompt: LiteralString = "Please approve the transaction on your wallet"
+    prompt: LiteralString = Field(description="Prompt message for the user to confirm the swap transaction")
 
 
 class SwapTransaction(BaseModel):
@@ -131,7 +131,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                     SwapTransaction.parse_obj(resp.json()),
                 )
 
-            return SwapTxResult()
+            return SwapTxResult(prompt="Please approve the swap transaction")
 
         return _build_swap_tx
 
@@ -191,6 +191,6 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                         SwapTransaction.parse_obj(resp.json()),
                     )
 
-                return SwapTxResult()
+                return SwapTxResult(prompt="Please approve the swap transaction")
 
         return _build_swap_tx

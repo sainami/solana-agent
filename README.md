@@ -5,7 +5,7 @@
 conda create -n solana-agent python=3.11
 conda activate solana-agent
 conda install -y 'langchain[all]' -c conda-forge
-conda install -y pydantic -c conda-forge
+pip install -U pydantic
 pip install -U langchain-experimental
 pip install -U langchain-community
 pip install -U langchain-openai
