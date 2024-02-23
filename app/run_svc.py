@@ -77,7 +77,7 @@ async def main():
     tvl_querier = TVLQuerier()
     yield_querier = YieldQuerier()
     swap_tx_builder = SwapTxBuilder(chain_config=chain_config)
-    routing_querier = RoutingQuerier(chain_config=chain_config)
+    # routing_querier = RoutingQuerier(chain_config=chain_config)
     price_querier = PriceQuerier()
     python_tool = PythonAstREPLTool(
         metadata={"notification": "\n*Running Python code...*\n"},
@@ -95,7 +95,7 @@ async def main():
             tvl_querier.tool(),
             yield_querier.tool(),
             swap_tx_builder.tool(),
-            routing_querier.tool(),
+            # routing_querier.tool(),
             price_querier.tool(),
             python_tool,
             tavily_tool,
