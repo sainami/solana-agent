@@ -1,0 +1,12 @@
+{
+  "chat_args": {
+    "model_name": "gpt-4-1106-preview",
+    "temperature": 0.5,
+    "streaming": true
+  },
+  "agent_args": {
+    "model_name": "gpt-4-1106-preview",
+    "temperature": 0,
+    "streaming": false
+  }
+}
