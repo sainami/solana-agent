@@ -9,9 +9,9 @@ from config.chain import ChainConfig, TokenMetadata
 class RoutingQueryArgs(BaseModel):
     amount: float = Field(description="Amount of the token to swap in or swap out")
     swap_mode: Union[Literal["ExactIn"], Literal["ExactOut"]] = Field(description="Type of the swap event")
-    slippage_bps: float = Field(0.5, description="Slippage percentage tolerance")
     token_in_symbol: str = Field(description="Symbol of the token to swap in")
     token_out_symbol: str = Field(description="Symbol of the token to swap out")
+    slippage_bps: float = Field(0.5, description="Slippage percentage tolerance")
 
 
 class RoutingResult(BaseModel):
@@ -132,19 +132,17 @@ class RoutingQuerier(FunctionWrapper[RoutingQueryArgs, RoutingResult]):
         def _query_routing(
             amount: float,
             swap_mode: Union[Literal["ExactIn"], Literal["ExactOut"]],
+            token_in_symbol: str,
+            token_out_symbol: str,
             slippage_bps: float = 0.5,
-            token_in_symbol: Optional[str] = None,
-            token_in_address: Optional[str] = None,
-            token_out_symbol: Optional[str] = None,
-            token_out_address: Optional[str] = None,
         ) -> RoutingResult:
             """Query routing information from the routing service."""
-            token_in = self.chain_config.get_token(token_in_symbol, token_in_address)
+            token_in = self.chain_config.get_token(token_in_symbol, None)
             if not token_in:
-                raise ValueError(f"Input token not found: {token_in_symbol} {token_in_address}")
-            token_out = self.chain_config.get_token(token_out_symbol, token_out_address)
+                raise ValueError(f"Input token not found: {token_in_symbol}")
+            token_out = self.chain_config.get_token(token_out_symbol, None)
             if not token_out:
-                raise ValueError(f"Output token not found: {token_out_symbol} {token_out_address}")
+                raise ValueError(f"Output token not found: {token_out_symbol}")
             resp = http_get(
                 self.base_url + "/quote",
                 params=self._create_params(
@@ -164,20 +162,18 @@ class RoutingQuerier(FunctionWrapper[RoutingQueryArgs, RoutingResult]):
         async def _query_routing(
             amount: float,
             swap_mode: Union[Literal["ExactIn"], Literal["ExactOut"]],
+            token_in_symbol: str,
+            token_out_symbol: str,
             slippage_bps: float = 0.5,
-            token_in_symbol: Optional[str] = None,
-            token_in_address: Optional[str] = None,
-            token_out_symbol: Optional[str] = None,
-            token_out_address: Optional[str] = None,
         ) -> RoutingResult:
             """Query routing information from the routing service."""
             async with AsyncClient() as client:
-                token_in = self.chain_config.get_token(token_in_symbol, token_in_address)
+                token_in = self.chain_config.get_token(token_in_symbol, None)
                 if not token_in:
-                    raise ValueError(f"Input token not found: {token_in_symbol} {token_in_address}")
-                token_out = self.chain_config.get_token(token_out_symbol, token_out_address)
+                    raise ValueError(f"Input token not found: {token_in_symbol}")
+                token_out = self.chain_config.get_token(token_out_symbol, None)
                 if not token_out:
-                    raise ValueError(f"Output token not found: {token_out_symbol} {token_out_address}")
+                    raise ValueError(f"Output token not found: {token_out_symbol}")
                 resp = await client.get(
                     self.base_url + "/quote",
                     params=self._create_params(

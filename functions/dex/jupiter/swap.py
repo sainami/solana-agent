@@ -86,7 +86,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             token_in_symbol: str,
             token_out_symbol: str,
             slippage_bps: float = 0.5,
-            callback_manager: Optional[CallbackManager] = None,
+            callbacks: Optional[CallbackManager] = None,
         ) -> SwapTxResult:
             """Build a swap transaction for a user to swap tokens on Jupiter"""
             token_in = self.chain_config.get_token(token_in_symbol, None)
@@ -121,9 +121,9 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 raise RuntimeError(
                     f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                 )
-            if callback_manager:
+            if callbacks:
                 handle_event(
-                    callback_manager.inheritable_handlers,
+                    callbacks.inheritable_handlers,
                     "send_metadata",
                     None,
                     SwapTransaction.parse_obj(resp.json()),
@@ -142,7 +142,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             token_in_symbol: str,
             token_out_symbol: str,
             slippage_bps: float = 0.5,
-            callback_manager: Optional[CallbackManager] = None,
+            callbacks: Optional[AsyncCallbackManager] = None,
         ) -> SwapTxResult:
             """Build a swap transaction for a user to swap tokens on Jupiter"""
             async with AsyncClient() as client:
@@ -179,9 +179,9 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                     raise RuntimeError(
                         f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                     )
-                if callback_manager:
+                if callbacks:
                     await ahandle_event(
-                        callback_manager.inheritable_handlers,
+                        callbacks.inheritable_handlers,
                         "send_metadata",
                         None,
                         SwapTransaction.parse_obj(resp.json()),
