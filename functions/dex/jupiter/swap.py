@@ -34,12 +34,6 @@ class SwapTxResult(BaseModel):
     priority_fee: int = Field(description="Priority fee in lamports")
 
 
-# class SwapTransaction(BaseModel):
-#     tx: str = Field(alias="swapTransaction")
-#     last_valid_height: int = Field(alias="lastValidBlockHeight")
-#     priority_fee_lamports: int = Field(alias="prioritizationFeeLamports")
-
-
 class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
     """Build a swap transaction for a user to swap tokens on jupiter"""
     return_direct: bool = True
@@ -170,7 +164,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                     )
                 data: dict = resp.json()
                 return SwapTxResult(
-                    raw_tx=data["swapTransaction"],
+                    swap_tx=data["swapTransaction"],
                     last_valid_height=data["lastValidBlockHeight"],
                     priority_fee=data["prioritizationFeeLamports"],
                 )
