@@ -41,6 +41,8 @@ class SwapTransaction(BaseModel):
 
 class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
     """Build a swap transaction for a user to swap tokens on jupiter"""
+    return_direct: bool = True
+
     chain_config: ChainConfig
     base_url: str = "https://quote-api.jup.ag/v6"
 
@@ -123,7 +125,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 )
             if callbacks:
                 handle_event(
-                    callbacks.inheritable_handlers,
+                    callbacks.inheritable_handlers + callbacks.handlers,
                     "send_metadata",
                     None,
                     SwapTransaction.parse_obj(resp.json()),
@@ -181,7 +183,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                     )
                 if callbacks:
                     await ahandle_event(
-                        callbacks.inheritable_handlers,
+                        callbacks.inheritable_handlers + callbacks.handlers,
                         "send_metadata",
                         None,
                         SwapTransaction.parse_obj(resp.json()),

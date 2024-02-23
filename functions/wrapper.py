@@ -41,6 +41,8 @@ AsyncRunnableFunc = Union[
 class FunctionWrapper(Generic[Input, Output]):
     """A wrapper which wraps a function to either a runnable or a tool."""
 
+    return_direct: bool = False
+
     def __init__(self):
         if self.func:
             self._validate_func(self.func)
@@ -179,6 +181,7 @@ class FunctionWrapper(Generic[Input, Output]):
             coroutine=self.async_tool_func,
             name=self.name(),
             description=self.description(),
+            return_direct=self.return_direct,
             args_schema=self.input_type(),
             metadata={
                 "notification": self.notification()
