@@ -57,7 +57,7 @@ class FunctionWrapper(Generic[Input, Output]):
         }
         func_params = {
             name: (param.annotation, param.default if param.default is not Signature.empty else None)
-            for name, param in signature(func).parameters.items() if name is "callbacks"
+            for name, param in signature(func).parameters.items() if name is not "callbacks"
         }
         if input_fields != func_params:
             raise TypeError(f"input fields {input_fields} and function parameters {func_params} don't match")

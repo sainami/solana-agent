@@ -35,7 +35,7 @@ class TokenLister(FunctionWrapper[ListingArgs, ListingResult]):
 
     @property
     def func(self) -> Optional[Callable[..., ListingResult]]:
-        def _token_list(*, limit: int = 20) -> ListingResult:
+        def _token_list(limit: int = 20) -> ListingResult:
             if limit <= 0:
                 raise ValueError("limit must be a positive integer")
 
