@@ -83,20 +83,18 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             user_address: str,
             amount: float,
             swap_mode: Union[Literal["ExactIn"], Literal["ExactOut"]],
+            token_in_symbol: str,
+            token_out_symbol: str,
             slippage_bps: float = 0.5,
-            token_in_symbol: Optional[str] = None,
-            token_in_address: Optional[str] = None,
-            token_out_symbol: Optional[str] = None,
-            token_out_address: Optional[str] = None,
             callback_manager: Optional[CallbackManager] = None,
         ) -> SwapTxResult:
             """Build a swap transaction for a user to swap tokens on Jupiter"""
-            token_in = self.chain_config.get_token(token_in_symbol, token_in_address)
+            token_in = self.chain_config.get_token(token_in_symbol, None)
             if not token_in:
-                raise ValueError(f"Input token not found: {token_in_symbol} {token_in_address}")
-            token_out = self.chain_config.get_token(token_out_symbol, token_out_address)
+                raise ValueError(f"Input token not found: {token_in_symbol}")
+            token_out = self.chain_config.get_token(token_out_symbol, None)
             if not token_out:
-                raise ValueError(f"Output token not found: {token_out_symbol} {token_out_address}")
+                raise ValueError(f"Output token not found: {token_out_symbol}")
             resp = http_get(
                 self.base_url + "/quote",
                 params=self._create_params(
@@ -141,21 +139,19 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             user_address: str,
             amount: float,
             swap_mode: Union[Literal["ExactIn"], Literal["ExactOut"]],
+            token_in_symbol: str,
+            token_out_symbol: str,
             slippage_bps: float = 0.5,
-            token_in_symbol: Optional[str] = None,
-            token_in_address: Optional[str] = None,
-            token_out_symbol: Optional[str] = None,
-            token_out_address: Optional[str] = None,
-            callback_manager: Optional[AsyncCallbackManager] = None,
+            callback_manager: Optional[CallbackManager] = None,
         ) -> SwapTxResult:
             """Build a swap transaction for a user to swap tokens on Jupiter"""
             async with AsyncClient() as client:
-                token_in = self.chain_config.get_token(token_in_symbol, token_in_address)
+                token_in = self.chain_config.get_token(token_in_symbol, None)
                 if not token_in:
-                    raise ValueError(f"Input token not found: {token_in_symbol} {token_in_address}")
-                token_out = self.chain_config.get_token(token_out_symbol, token_out_address)
+                    raise ValueError(f"Input token not found: {token_in_symbol}")
+                token_out = self.chain_config.get_token(token_out_symbol, None)
                 if not token_out:
-                    raise ValueError(f"Output token not found: {token_out_symbol} {token_out_address}")
+                    raise ValueError(f"Output token not found: {token_out_symbol}")
 
                 resp = await client.get(
                     self.base_url + "/quote",
