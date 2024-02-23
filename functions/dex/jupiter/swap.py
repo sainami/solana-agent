@@ -1,3 +1,5 @@
+import logging
+
 from httpx import get as http_get, post as http_post, AsyncClient
 from typing import Any, Union, Literal, LiteralString, Mapping, Optional, Callable, Awaitable
 from pydantic.v1 import BaseModel, Field, validator
@@ -121,7 +123,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 )
             if callbacks:
                 handle_event(
-                    callbacks.inheritable_handlers + callbacks.handlers,
+                    callbacks.inheritable_handlers,
                     "send_metadata",
                     None,
                     SwapTransaction.parse_obj(resp.json()),
@@ -173,8 +175,9 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                         f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                     )
                 if callbacks:
+                    logging.info("================= send metadata ================")
                     await ahandle_event(
-                        callbacks.inheritable_handlers + callbacks.handlers,
+                        callbacks.inheritable_handlers,
                         "send_metadata",
                         None,
                         SwapTransaction.parse_obj(resp.json()),
