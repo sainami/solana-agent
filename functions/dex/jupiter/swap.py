@@ -1,5 +1,3 @@
-import logging
-
 from httpx import get as http_get, post as http_post, AsyncClient, Response
 from typing import Any, Union, List, Literal, LiteralString, Mapping, Optional, Callable, Awaitable
 from pydantic.v1 import BaseModel, Field, validator
@@ -243,7 +241,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                     last_valid_height=data["lastValidBlockHeight"],
                     priority_fee=data["prioritizationFeeLamports"],
                 )
-                logging.info(f"Swap transaction created: {res.json(indent=2)}")
+                print(f"Swap transaction created: {res.json(indent=2)}")
                 return res
 
         return _build_swap_tx
