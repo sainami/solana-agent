@@ -1,7 +1,7 @@
 from typing import Sequence, Optional, List, Tuple
-from langchain.agents import AgentExecutor, OpenAIFunctionsAgent
+from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_community.tools import BaseTool
-from langchain.prompts import MessagesPlaceholder
+from langchain_core.prompts.chat import ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder
 from langchain.schema import BaseMessage, SystemMessage, HumanMessage, AIMessage
 from langchain.schema.runnable import RunnableConfig
 from langchain_openai.chat_models import ChatOpenAI
@@ -17,14 +17,15 @@ class Chatter:
         tools: Sequence[BaseTool],
         **kwargs,
     ):
-        messages = MessagesPlaceholder(variable_name="messages")
-        agent = OpenAIFunctionsAgent.from_llm_and_tools(
-            model,
-            tools,
-            extra_prompt_messages=[messages],
-            system_message=None,
+        prompt = ChatPromptTemplate(
+            messages=[
+                MessagesPlaceholder(variable_name="messages"),
+                HumanMessagePromptTemplate.from_template("{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ],
         )
-        self.agent = AgentExecutor.from_agent_and_tools(agent, tools, **kwargs)
+        agent = create_openai_tools_agent(model, tools, prompt)
+        self.agent = AgentExecutor(agent=agent, tools=tools, **kwargs)
 
     @staticmethod
     def _create_messages(chat_history: List[Tuple[str, str]]) -> List[BaseMessage]:
