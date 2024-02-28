@@ -6,7 +6,7 @@ from functions.wrapper import FunctionWrapper
 
 
 class ListingArgs(BaseModel):
-    limit: int = Field(20, description="The maximum number of tokens to list")
+    limit: int = Field(10, description="The maximum number of tokens to list")
 
 
 class ListingResult(BaseModel):
@@ -35,7 +35,7 @@ class TokenLister(FunctionWrapper[ListingArgs, ListingResult]):
 
     @property
     def func(self) -> Optional[Callable[..., ListingResult]]:
-        def _token_list(limit: int = 20) -> ListingResult:
+        def _token_list(limit: int = 10) -> ListingResult:
             if limit <= 0:
                 raise ValueError("limit must be a positive integer")
 
