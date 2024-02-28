@@ -51,7 +51,7 @@ class SwapTxArgs(BaseModel):
 
 
 class SwapTxResult(BaseModel):
-    swap_route: str = Field(description="Swap route simulation")
+    swap_route: dict = Field(description="Swap route simulation")
     swap_tx: str = Field(description="Swap transaction encoded in base64")
     last_valid_height: int = Field(description="Last valid block height")
     priority_fee: int = Field(description="Priority fee in lamports")
@@ -138,7 +138,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
         token_out: TokenMetadata,
     ) -> SwapRoute:
         if resp.status_code == 200:
-            body: dict = resp.json()
+            body: Mapping[str, Any] = resp.json()
             return SwapRoute(
                 swap_mode=swap_mode,
                 amount_in=float(body["inAmount"]) / 10 ** token_in.decimals,
@@ -185,9 +185,9 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 raise RuntimeError(
                     f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                 )
-            data: dict = resp.json()
+            data: Mapping[str, Any] = resp.json()
             return SwapTxResult(
-                swap_route=swap_route.json(),
+                swap_route=swap_route.dict(),
                 swap_tx=data["swapTransaction"],
                 last_valid_height=data["lastValidBlockHeight"],
                 priority_fee=data["prioritizationFeeLamports"],
@@ -235,7 +235,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                     raise RuntimeError(
                         f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                     )
-                data: dict = resp.json()
+                data: Mapping[str, Any] = resp.json()
                 return SwapTxResult(
                     swap_tx=data["swapTransaction"],
                     last_valid_height=data["lastValidBlockHeight"],
