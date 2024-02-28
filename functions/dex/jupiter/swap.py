@@ -142,13 +142,13 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
     ) -> SwapRoute:
         if resp.status_code == 200:
             body: Mapping[str, Any] = resp.json()
+            route_plan: List[Mapping[str, Any]] = body["routePlan"]
             return SwapRoute(
                 swap_mode=swap_mode,
                 amount_in=float(body["inAmount"]) / 10 ** token_in.decimals,
                 amount_out=float(body["outAmount"]) / 10 ** token_out.decimals,
                 price_impact_pct=float(body["priceImpactPct"]),
-                # route_plan=[self._create_route_plan(route) for route in body["routePlan"]],
-                route_plan=[],
+                route_plan=[self._create_route_plan(route) for route in route_plan],
             )
         else:
             raise RuntimeError(f"failed to query routing: status: {resp.status_code}, response: {resp.text}")
