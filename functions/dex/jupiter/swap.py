@@ -7,26 +7,28 @@ from functions.wrapper import FunctionWrapper
 from config.chain import ChainConfig, TokenMetadata
 
 
+class SwapInfo(BaseModel):
+    amm_address: str = Field(description="Address of the AMM pool")
+    label: str = Field(description="Label of the AMM pool")
+    token_in_symbol: str = Field(description="Input token symbol")
+    token_out_symbol: str = Field(description="Output token symbol")
+    fee_token_symbol: str = Field(description="Fee token symbol")
+    amount_in: float = Field(description="Amount of the token to swap in")
+    amount_out: float = Field(description="Amount of the token to swap out")
+    fee_amount: float = Field(description="Fee amount")
+
+
+class Route(BaseModel):
+    swap_info: SwapInfo = Field(description="Swap information")
+    percent: int = Field(description="Percentage of the swap")
+
+
 class SwapRoute(BaseModel):
     swap_mode: Union[Literal["ExactIn"], Literal["ExactOut"]] = Field(description="Type of the swap event")
     amount_in: float = Field(description="Amount of the token to swap in")
     amount_out: float = Field(description="Amount of the token to swap out")
     price_impact_pct: float = Field(description="Price impact percentage")
-    route_plan: List["Route"] = Field(description="Swap route plan")
-
-    class Route(BaseModel):
-        swap_info: "SwapInfo" = Field(description="Swap information")
-        percent: int = Field(description="Percentage of the swap")
-
-        class SwapInfo(BaseModel):
-            amm_address: str = Field(description="Address of the AMM pool")
-            label: str = Field(description="Label of the AMM pool")
-            token_in_symbol: str = Field(description="Input token symbol")
-            token_out_symbol: str = Field(description="Output token symbol")
-            fee_token_symbol: str = Field(description="Fee token symbol")
-            amount_in: float = Field(description="Amount of the token to swap in")
-            amount_out: float = Field(description="Amount of the token to swap out")
-            fee_amount: float = Field(description="Fee amount")
+    route_plan: List[Route] = Field(description="Swap route plan")
 
 
 class SwapTxArgs(BaseModel):
@@ -51,7 +53,7 @@ class SwapTxArgs(BaseModel):
 
 
 class SwapTxResult(BaseModel):
-    swap_route: str = Field(description="Swap route simulation")
+    swap_route: SwapRoute = Field(description="Swap route simulation")
     swap_tx: str = Field(description="Swap transaction encoded in base64")
     last_valid_height: int = Field(description="Last valid block height")
     priority_fee: int = Field(description="Priority fee in lamports")
@@ -97,7 +99,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             "outputMint": token_out.address,
         }
 
-    def _create_route_plan(self, route: dict) -> SwapRoute.Route:
+    def _create_route_plan(self, route: dict) -> Route:
         token_in_address: str = route["inputMint"]
         token_in = self.chain_config.get_token(None, token_in_address)
         if not token_in:
@@ -116,8 +118,8 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
         amount_in = float(route["inAmount"])
         amount_out = float(route["outAmount"])
         fee_amount = float(route["feeAmount"])
-        return SwapRoute.Route(
-            swap_info=SwapRoute.Route.SwapInfo(
+        return Route(
+            swap_info=SwapInfo(
                 amm_address=route["ammKey"],
                 label=route["label"],
                 token_in_symbol=token_in.symbol,
@@ -187,7 +189,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 )
             data: Mapping[str, Any] = resp.json()
             return SwapTxResult(
-                swap_route=swap_route.json(),
+                swap_route=swap_route,
                 swap_tx=data["swapTransaction"],
                 last_valid_height=data["lastValidBlockHeight"],
                 priority_fee=data["prioritizationFeeLamports"],
@@ -234,7 +236,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                     )
                 data: Mapping[str, Any] = resp.json()
                 return SwapTxResult(
-                    swap_route=swap_route.json(),
+                    swap_route=swap_route,
                     swap_tx=data["swapTransaction"],
                     last_valid_height=data["lastValidBlockHeight"],
                     priority_fee=data["prioritizationFeeLamports"],
