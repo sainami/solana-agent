@@ -53,7 +53,7 @@ class SwapTxArgs(BaseModel):
 
 
 class SwapTxResult(BaseModel):
-    swap_route: SwapRoute = Field(description="Swap route simulation")
+    # swap_route: SwapRoute = Field(description="Swap route simulation")
     swap_tx: str = Field(description="Swap transaction encoded in base64")
     last_valid_height: int = Field(description="Last valid block height")
     priority_fee: int = Field(description="Priority fee in lamports")
@@ -235,13 +235,11 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                         f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                     )
                 data: Mapping[str, Any] = resp.json()
-                res = SwapTxResult(
-                    swap_route=swap_route,
+                return SwapTxResult(
+                    # swap_route=swap_route,
                     swap_tx=data["swapTransaction"],
                     last_valid_height=data["lastValidBlockHeight"],
                     priority_fee=data["prioritizationFeeLamports"],
                 )
-                print(f"Swap transaction created: {res.json(indent=2)}")
-                return res
 
         return _build_swap_tx
