@@ -1,10 +1,32 @@
-from httpx import get as http_get, post as http_post, AsyncClient
-from typing import Any, Union, Literal, LiteralString, Mapping, Optional, Callable, Awaitable
+from httpx import get as http_get, post as http_post, AsyncClient, Response
+from typing import Any, Union, List, Literal, LiteralString, Mapping, Optional, Callable, Awaitable
 from pydantic.v1 import BaseModel, Field, validator
 from solders.pubkey import Pubkey
 
 from functions.wrapper import FunctionWrapper
 from config.chain import ChainConfig, TokenMetadata
+
+
+class RouteInfo(BaseModel):
+    swap_mode: Union[Literal["ExactIn"], Literal["ExactOut"]] = Field(description="Type of the swap event")
+    amount_in: float = Field(description="Amount of the token to swap in")
+    amount_out: float = Field(description="Amount of the token to swap out")
+    price_impact_pct: float = Field(description="Price impact percentage")
+    route_plan: List["Route"] = Field(description="Swap route plan")
+
+    class Route(BaseModel):
+        swap_info: "SwapInfo" = Field(description="Swap information")
+        percent: int = Field(description="Percentage of the swap")
+
+        class SwapInfo(BaseModel):
+            amm_address: str = Field(description="Address of the AMM pool")
+            label: str = Field(description="Label of the AMM pool")
+            token_in_symbol: str = Field(description="Input token symbol")
+            token_out_symbol: str = Field(description="Output token symbol")
+            fee_token_symbol: str = Field(description="Fee token symbol")
+            amount_in: float = Field(description="Amount of the token to swap in")
+            amount_out: float = Field(description="Amount of the token to swap out")
+            fee_amount: float = Field(description="Fee amount")
 
 
 class SwapTxArgs(BaseModel):
@@ -29,6 +51,7 @@ class SwapTxArgs(BaseModel):
 
 
 class SwapTxResult(BaseModel):
+    swap_route: RouteInfo = Field(description="Swap route simulation")
     swap_tx: str = Field(description="Swap transaction encoded in base64")
     last_valid_height: int = Field(description="Last valid block height")
     priority_fee: int = Field(description="Priority fee in lamports")
@@ -74,6 +97,60 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             "outputMint": token_out.address,
         }
 
+    def _create_route_plan(self, route: dict) -> RouteInfo.Route:
+        token_in_address: str = route["inputMint"]
+        token_in = self.chain_config.get_token(None, token_in_address)
+        if not token_in:
+            raise ValueError(f"Input token not found: {token_in_address}")
+
+        token_out_address: str = route["outputMint"]
+        token_out = self.chain_config.get_token(None, token_out_address)
+        if not token_out:
+            raise ValueError(f"Output token not found: {token_out_address}")
+
+        fee_token_address: str = route["feeMint"]
+        fee_token = self.chain_config.get_token(None, fee_token_address)
+        if not fee_token:
+            raise ValueError(f"Fee token not found: {fee_token_address}")
+
+        amount_in = float(route["inAmount"])
+        amount_out = float(route["outAmount"])
+        fee_amount = float(route["feeAmount"])
+        return RouteInfo.Route(
+            swap_info=RouteInfo.Route.SwapInfo(
+                amm_address=route["ammKey"],
+                label=route["label"],
+                token_in_symbol=token_in.symbol,
+                token_out_symbol=token_out.symbol,
+                fee_token_symbol=fee_token.symbol,
+                amount_in=float(amount_in) / 10 ** token_in.decimals,
+                amount_out=float(amount_out) / 10 ** token_out.decimals,
+                fee_amount=float(fee_amount) / 10 ** fee_token.decimals
+            ),
+            percent=route["percent"],
+        )
+
+    def _create_route_info(
+        self,
+        resp: Response,
+        swap_mode: Union[Literal["ExactIn"], Literal["ExactOut"]],
+        token_in: TokenMetadata,
+        token_out: TokenMetadata,
+    ) -> RouteInfo:
+        if resp.status_code == 200:
+            body: dict = resp.json()
+            return RouteInfo(
+                swap_mode=swap_mode,
+                amount_in=float(body["inAmount"]) / 10 ** token_in.decimals,
+                amount_out=float(body["outAmount"]) / 10 ** token_out.decimals,
+                price_impact_pct=float(body["priceImpactPct"]),
+                route_plan=[
+                    self._create_route_plan(route) for route in body["routePlan"]
+                ],
+            )
+        else:
+            raise RuntimeError(f"failed to query routing: status: {resp.status_code}, response: {resp.text}")
+
     @property
     def func(self) -> Optional[Callable[..., SwapTxResult]]:
         def _build_swap_tx(
@@ -101,6 +178,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 raise RuntimeError(
                     f"failed to query swap routing: status: {resp.status_code}, response: {resp.text}"
                 )
+            swap_route = self._create_route_info(resp, swap_mode, token_in, token_out)
 
             resp = http_post(
                 self.base_url + "/swap",
@@ -115,6 +193,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 )
             data: dict = resp.json()
             return SwapTxResult(
+                swap_route=swap_route,
                 swap_tx=data["swapTransaction"],
                 last_valid_height=data["lastValidBlockHeight"],
                 priority_fee=data["prioritizationFeeLamports"],
