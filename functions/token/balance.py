@@ -11,7 +11,7 @@ from functions.wrapper import FunctionWrapper
 
 class BalanceArgs(BaseModel):
     account: str = Field(description="The account address to query balance for")
-    token_symbols: List[str] = Field(description="The symbols of the tokens")
+    token_symbols: List[str] = Field(description="The symbol list of the tokens pending query")
 
     @validator("account", pre=True)
     @classmethod
@@ -52,15 +52,15 @@ class BalanceGetter(FunctionWrapper[BalanceArgs, BalanceResult]):
 
     @classmethod
     def name(cls) -> LiteralString:
-        return "get_token_balances"
+        return "query_token_balances"
 
     @classmethod
     def description(cls) -> LiteralString:
-        return "get token balances of the specified account on Solana"
+        return "query token balances based on symbols on Solana"
 
     @classmethod
     def notification(cls) -> str:
-        return "\n*Querying token balances...*\n"
+        return "\n*Querying token balances in batch...*\n"
 
     @property
     def func(self) -> Optional[Callable[..., BalanceResult]]:

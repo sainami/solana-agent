@@ -6,6 +6,12 @@
   },
   "tokens": [
     {
+      "name": "Wrapped SOL",
+      "symbol": "SOL",
+      "address": "So11111111111111111111111111111111111111112",
+      "decimals": 9
+    },
+    {
       "name": "USD Coin",
       "symbol": "USDC",
       "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
@@ -22,12 +28,6 @@
       "symbol": "JUP",
       "address": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
       "decimals": 6
-    },
-    {
-      "name": "Wrapped SOL",
-      "symbol": "SOL",
-      "address": "So11111111111111111111111111111111111111112",
-      "decimals": 9
     },
     {
       "name": "dogwifhat",

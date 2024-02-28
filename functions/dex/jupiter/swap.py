@@ -189,7 +189,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 )
             data: Mapping[str, Any] = resp.json()
             return SwapTxResult(
-                swap_route=swap_route,
+                # swap_route=swap_route,
                 swap_tx=data["swapTransaction"],
                 last_valid_height=data["lastValidBlockHeight"],
                 priority_fee=data["prioritizationFeeLamports"],
