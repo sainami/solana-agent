@@ -100,7 +100,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
             "outputMint": token_out.address,
         }
 
-    def _create_route_plan(self, route: Mapping[str, Any]) -> Route:
+    def _create_route_plan(self, route: dict) -> Route:
         token_in_address: str = route["inputMint"]
         token_in = self.chain_config.get_token(None, token_in_address)
         if not token_in:
