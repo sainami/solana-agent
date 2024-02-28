@@ -100,7 +100,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
             "outputMint": token_out.address,
         }
 
-    def _create_route_plan(self, route: dict) -> Route:
+    def _create_route_plan(self, route: Mapping[str, Any]) -> Route:
         token_in_address: str = route["inputMint"]
         token_in = self.chain_config.get_token(None, token_in_address)
         if not token_in:
@@ -147,7 +147,8 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
                 amount_in=float(body["inAmount"]) / 10 ** token_in.decimals,
                 amount_out=float(body["outAmount"]) / 10 ** token_out.decimals,
                 price_impact_pct=float(body["priceImpactPct"]),
-                route_plan=[self._create_route_plan(route) for route in body["routePlan"]],
+                # route_plan=[self._create_route_plan(route) for route in body["routePlan"]],
+                route_plan=[],
             )
         else:
             raise RuntimeError(f"failed to query routing: status: {resp.status_code}, response: {resp.text}")
