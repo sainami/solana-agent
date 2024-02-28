@@ -56,7 +56,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
 
     @classmethod
     def notification(cls) -> str:
-        return "\n*Building swap transaction...*\n"
+        return "\n*Preparing swap transaction on Jupiter, please confirm on you wallet...*\n"
 
     @staticmethod
     def _create_params(
