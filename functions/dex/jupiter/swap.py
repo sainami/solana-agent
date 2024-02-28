@@ -60,7 +60,7 @@ class SwapTxResult(BaseModel):
     priority_fee: int = Field(description="Priority fee in lamports")
 
 
-class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
+class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
     """Build a swap transaction for a user to swap tokens on jupiter"""
     return_direct: bool = True
 
@@ -100,29 +100,29 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
             "outputMint": token_out.address,
         }
 
-    def _create_route_plan(self, route: Mapping[str, Any]) -> Route:
-        token_in_address: str = route["inputMint"]
+    def _create_route_plan(self, swap_info: Mapping[str, Any], percent: int) -> Route:
+        token_in_address: str = swap_info["inputMint"]
         token_in = self.chain_config.get_token(None, token_in_address)
         if not token_in:
             raise ValueError(f"Input token not found: {token_in_address}")
 
-        token_out_address: str = route["outputMint"]
+        token_out_address: str = swap_info["outputMint"]
         token_out = self.chain_config.get_token(None, token_out_address)
         if not token_out:
             raise ValueError(f"Output token not found: {token_out_address}")
 
-        fee_token_address: str = route["feeMint"]
+        fee_token_address: str = swap_info["feeMint"]
         fee_token = self.chain_config.get_token(None, fee_token_address)
         if not fee_token:
             raise ValueError(f"Fee token not found: {fee_token_address}")
 
-        amount_in = float(route["inAmount"])
-        amount_out = float(route["outAmount"])
-        fee_amount = float(route["feeAmount"])
+        amount_in = float(swap_info["inAmount"])
+        amount_out = float(swap_info["outAmount"])
+        fee_amount = float(swap_info["feeAmount"])
         return Route(
             swap_info=SwapInfo(
-                amm_address=route["ammKey"],
-                label=route["label"],
+                amm_address=swap_info["ammKey"],
+                label=swap_info["label"],
                 token_in_symbol=token_in.symbol,
                 token_out_symbol=token_out.symbol,
                 fee_token_symbol=fee_token.symbol,
@@ -130,7 +130,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
                 amount_out=float(amount_out) / 10 ** token_out.decimals,
                 fee_amount=float(fee_amount) / 10 ** fee_token.decimals
             ),
-            percent=route["percent"],
+            percent=percent,
         )
 
     def _create_swap_route(
@@ -142,19 +142,20 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
     ) -> SwapRoute:
         if resp.status_code == 200:
             body: Mapping[str, Any] = resp.json()
-            route_plan: List[Mapping[str, Any]] = body["routePlan"]
             return SwapRoute(
                 swap_mode=swap_mode,
                 amount_in=float(body["inAmount"]) / 10 ** token_in.decimals,
                 amount_out=float(body["outAmount"]) / 10 ** token_out.decimals,
                 price_impact_pct=float(body["priceImpactPct"]),
-                route_plan=[self._create_route_plan(route) for route in route_plan],
+                route_plan=[
+                    self._create_route_plan(swap["swapInfo"], swap["percent"]) for swap in body["routePlan"]
+                ],
             )
         else:
             raise RuntimeError(f"failed to query routing: status: {resp.status_code}, response: {resp.text}")
 
     @property
-    def func(self) -> Optional[Callable[..., SwapRoute]]:
+    def func(self) -> Optional[Callable[..., SwapTxResult]]:
         def _build_swap_tx(
             user_address: str,
             amount: float,
@@ -162,7 +163,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
             token_in_symbol: str,
             token_out_symbol: str,
             slippage_bps: float = 0.5,
-        ) -> SwapRoute:
+        ) -> SwapTxResult:
             """Build a swap transaction for a user to swap tokens on Jupiter"""
             token_in = self.chain_config.get_token(token_in_symbol, None, wrap=True)
             token_out = self.chain_config.get_token(token_out_symbol, None, wrap=True)
@@ -190,19 +191,18 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
                     f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                 )
             data: Mapping[str, Any] = resp.json()
-            # return SwapTxResult(
-            #     swap_route=swap_route,
-            #     slippage_bps=slippage_bps,
-            #     swap_tx=data["swapTransaction"],
-            #     last_valid_height=data["lastValidBlockHeight"],
-            #     priority_fee=data["prioritizationFeeLamports"],
-            # )
-            return swap_route
+            return SwapTxResult(
+                swap_route=swap_route,
+                slippage_bps=slippage_bps,
+                swap_tx=data["swapTransaction"],
+                last_valid_height=data["lastValidBlockHeight"],
+                priority_fee=data["prioritizationFeeLamports"],
+            )
 
         return _build_swap_tx
 
     @property
-    def async_func(self) -> Optional[Callable[..., Awaitable[SwapRoute]]]:
+    def async_func(self) -> Optional[Callable[..., Awaitable[SwapTxResult]]]:
         async def _build_swap_tx(
             user_address: str,
             amount: float,
@@ -210,7 +210,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
             token_in_symbol: str,
             token_out_symbol: str,
             slippage_bps: float = 0.5,
-        ) -> SwapRoute:
+        ) -> SwapTxResult:
             """Build a swap transaction for a user to swap tokens on Jupiter"""
             async with AsyncClient() as client:
                 token_in = self.chain_config.get_token(token_in_symbol, None, wrap=True)
@@ -239,13 +239,12 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapRoute]):
                         f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                     )
                 data: Mapping[str, Any] = resp.json()
-                # return SwapTxResult(
-                #     swap_route=swap_route,
-                #     slippage_bps=slippage_bps,
-                #     swap_tx=data["swapTransaction"],
-                #     last_valid_height=data["lastValidBlockHeight"],
-                #     priority_fee=data["prioritizationFeeLamports"],
-                # )
-                return swap_route
+                return SwapTxResult(
+                    swap_route=swap_route,
+                    slippage_bps=slippage_bps,
+                    swap_tx=data["swapTransaction"],
+                    last_valid_height=data["lastValidBlockHeight"],
+                    priority_fee=data["prioritizationFeeLamports"],
+                )
 
         return _build_swap_tx
