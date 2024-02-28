@@ -25,7 +25,7 @@ class TVLQuerier(FunctionWrapper[TVLQueryArgs, TVLQueryResult]):
 
     @classmethod
     def description(cls) -> LiteralString:
-        return "query TVL data of protocol built on Solana"
+        return "query TVL data of protocols built on Solana"
 
     @classmethod
     def notification(cls) -> str:
