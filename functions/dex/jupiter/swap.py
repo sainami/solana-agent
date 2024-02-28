@@ -1,3 +1,5 @@
+import logging
+
 from httpx import get as http_get, post as http_post, AsyncClient, Response
 from typing import Any, Union, List, Literal, LiteralString, Mapping, Optional, Callable, Awaitable
 from pydantic.v1 import BaseModel, Field, validator
@@ -53,7 +55,7 @@ class SwapTxArgs(BaseModel):
 
 
 class SwapTxResult(BaseModel):
-    swap_route: str = Field(description="Swap route simulation")
+    swap_route: SwapRoute = Field(description="Swap route simulation")
     swap_tx: str = Field(description="Swap transaction encoded in base64")
     last_valid_height: int = Field(description="Last valid block height")
     priority_fee: int = Field(description="Priority fee in lamports")
@@ -189,7 +191,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 )
             data: Mapping[str, Any] = resp.json()
             return SwapTxResult(
-                swap_route=swap_route.json(),
+                swap_route=swap_route,
                 swap_tx=data["swapTransaction"],
                 last_valid_height=data["lastValidBlockHeight"],
                 priority_fee=data["prioritizationFeeLamports"],
@@ -235,11 +237,13 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                         f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                     )
                 data: Mapping[str, Any] = resp.json()
-                return SwapTxResult(
-                    swap_route=swap_route.json(),
+                res = SwapTxResult(
+                    swap_route=swap_route,
                     swap_tx=data["swapTransaction"],
                     last_valid_height=data["lastValidBlockHeight"],
                     priority_fee=data["prioritizationFeeLamports"],
                 )
+                logging.info(f"Swap transaction created: {res.json(indent=2)}")
+                return res
 
         return _build_swap_tx
