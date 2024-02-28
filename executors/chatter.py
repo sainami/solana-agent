@@ -1,5 +1,5 @@
 from typing import Sequence, Optional, List, Tuple
-from langchain.agents import AgentExecutor, create_openai_functions_agent, create_openai_tools_agent
+from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_community.tools import BaseTool
 from langchain_core.prompts.chat import ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder
 from langchain.schema import BaseMessage, SystemMessage, HumanMessage, AIMessage
@@ -24,7 +24,7 @@ class Chatter:
                 MessagesPlaceholder(variable_name="agent_scratchpad"),
             ],
         )
-        agent = create_openai_tools_agent(model, tools, prompt)
+        agent = create_openai_functions_agent(model, tools, prompt)
         self.agent = AgentExecutor(agent=agent, tools=tools, **kwargs)
 
     @staticmethod
