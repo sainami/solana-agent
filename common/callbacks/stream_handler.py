@@ -1,7 +1,6 @@
 from asyncio import Queue
 from typing import Any, Optional, List
 from uuid import UUID
-from pydantic import BaseModel
 from langchain.callbacks.base import AsyncCallbackHandler
 
 from common.response import BaseResponse
