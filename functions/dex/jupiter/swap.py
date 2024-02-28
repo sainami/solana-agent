@@ -53,7 +53,8 @@ class SwapTxArgs(BaseModel):
 
 
 class SwapTxResult(BaseModel):
-    # swap_route: SwapRoute = Field(description="Swap route simulation")
+    swap_route: SwapRoute = Field(description="Swap route simulation")
+    slippage_bps: float = Field(description="Slippage percentage tolerance")
     swap_tx: str = Field(description="Swap transaction encoded in base64")
     last_valid_height: int = Field(description="Last valid block height")
     priority_fee: int = Field(description="Priority fee in lamports")
@@ -81,7 +82,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
 
     @classmethod
     def notification(cls) -> str:
-        return "\n*Preparing swap transaction on Jupiter, please confirm on you wallet...*\n"
+        return "\n*Preparing to swap on Jupiter, please confirm on you wallet...*\n"
 
     @staticmethod
     def _create_params(
@@ -189,7 +190,8 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                 )
             data: Mapping[str, Any] = resp.json()
             return SwapTxResult(
-                # swap_route=swap_route,
+                swap_route=swap_route,
+                slippage_bps=slippage_bps,
                 swap_tx=data["swapTransaction"],
                 last_valid_height=data["lastValidBlockHeight"],
                 priority_fee=data["prioritizationFeeLamports"],
@@ -221,7 +223,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                         slippage_bps,
                     ),
                 )
-                # swap_route = self._create_swap_route(resp, swap_mode, token_in, token_out)
+                swap_route = self._create_swap_route(resp, swap_mode, token_in, token_out)
 
                 resp = await client.post(
                     self.base_url + "/swap",
@@ -236,7 +238,8 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                     )
                 data: Mapping[str, Any] = resp.json()
                 return SwapTxResult(
-                    # swap_route=swap_route,
+                    swap_route=swap_route,
+                    slippage_bps=slippage_bps,
                     swap_tx=data["swapTransaction"],
                     last_valid_height=data["lastValidBlockHeight"],
                     priority_fee=data["prioritizationFeeLamports"],
