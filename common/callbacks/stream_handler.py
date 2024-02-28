@@ -20,7 +20,7 @@ class StreamingCallbackHandler(AsyncCallbackHandler):
 
     @staticmethod
     def _frame(data: StreamingResponse) -> str:
-        return "data: " + data.json() + "\n\n"
+        return "data: " + data.model_dump_json() + "\n\n"
 
     async def __anext__(self):
         data = await self._queue.get()
