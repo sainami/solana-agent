@@ -221,8 +221,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                         slippage_bps,
                     ),
                 )
-                swap_route = self._create_swap_route(resp, swap_mode, token_in, token_out)
-                print(swap_route.json(indent=2))
+                # swap_route = self._create_swap_route(resp, swap_mode, token_in, token_out)
 
                 resp = await client.post(
                     self.base_url + "/swap",
