@@ -211,7 +211,7 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
             async with AsyncClient() as client:
                 token_in = self.chain_config.get_token(token_in_symbol, None, wrap=True)
                 token_out = self.chain_config.get_token(token_out_symbol, None, wrap=True)
-                resp1 = await client.get(
+                resp = await client.get(
                     self.base_url + "/quote",
                     params=self._create_params(
                         amount,
@@ -221,20 +221,21 @@ class SwapTxBuilder(FunctionWrapper[SwapTxArgs, SwapTxResult]):
                         slippage_bps,
                     ),
                 )
-                swap_route = self._create_swap_route(resp1, swap_mode, token_in, token_out)
+                swap_route = self._create_swap_route(resp, swap_mode, token_in, token_out)
+                print(swap_route.json(indent=2))
 
-                resp2 = await client.post(
+                resp = await client.post(
                     self.base_url + "/swap",
                     json={
                         "userPublicKey": user_address,
-                        "quoteResponse": resp1.json(),
+                        "quoteResponse": resp.json(),
                     },
                 )
-                if resp2.status_code != 200:
+                if resp.status_code != 200:
                     raise RuntimeError(
-                        f"failed to query swap transaction: status: {resp2.status_code}, response: {resp2.text}"
+                        f"failed to query swap transaction: status: {resp.status_code}, response: {resp.text}"
                     )
-                data: Mapping[str, Any] = resp2.json()
+                data: Mapping[str, Any] = resp.json()
                 return SwapTxResult(
                     # swap_route=swap_route,
                     swap_tx=data["swapTransaction"],
