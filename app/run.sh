@@ -11,4 +11,4 @@ python app/run_svc.py \
   --port=8105 \
   --model-config=".config/model.json" \
   --chain-config=".config/chain.json" \
-  --rpc="https://rpc.ankr.com/solana/3d3768859f11aef1e3cdf0a25e9f5d5691ec8357424bd5fd9447fc6c26114461"
+  --rpc="https://api.mainnet-beta.solana.com"
