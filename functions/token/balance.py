@@ -1,6 +1,7 @@
 from typing import Any, List, Mapping, Optional, LiteralString, Callable, Awaitable
 from pydantic.v1 import BaseModel, Field, validator
 from solders.pubkey import Pubkey
+from solders.rpc.responses import GetBalanceResp, GetTokenAccountBalanceResp
 from solders.token.associated import get_associated_token_address
 from solana.rpc.api import Client
 from solana.rpc.async_api import AsyncClient
@@ -79,10 +80,16 @@ class BalanceGetter(FunctionWrapper[BalanceArgs, BalanceResult]):
                         token_mint = Pubkey.from_string(token.address)
                         token_account = get_associated_token_address(account, token_mint)
                         resp = self.client.get_token_account_balance(token_account)
-                        balances[symbol] = resp.value.ui_amount_string
+                        if isinstance(resp, GetTokenAccountBalanceResp):
+                            balances[symbol] = resp.value.ui_amount_string
+                        else:
+                            balances[symbol] = "0"
                     else:
                         resp = self.client.get_balance(account)
-                        balances[symbol] = str(resp.value / 10 ** self.chain_config.chain.coin_decimals)
+                        if isinstance(resp, GetBalanceResp):
+                            balances[symbol] = str(resp.value / 10 ** self.chain_config.chain.coin_decimals)
+                        else:
+                            balances[symbol] = "0"
                 return BalanceResult(balances=balances)
 
             return _get_balance
@@ -104,10 +111,16 @@ class BalanceGetter(FunctionWrapper[BalanceArgs, BalanceResult]):
                         token_mint = Pubkey.from_string(token.address)
                         token_account = get_associated_token_address(account, token_mint)
                         resp = await self.async_client.get_token_account_balance(token_account)
-                        balances[symbol] = resp.value.ui_amount_string
+                        if isinstance(resp, GetTokenAccountBalanceResp):
+                            balances[symbol] = resp.value.ui_amount_string
+                        else:
+                            balances[symbol] = "0"
                     else:
                         resp = await self.async_client.get_balance(account)
-                        balances[symbol] = str(resp.value / 10 ** self.chain_config.chain.coin_decimals)
+                        if isinstance(resp, GetBalanceResp):
+                            balances[symbol] = str(resp.value / 10 ** self.chain_config.chain.coin_decimals)
+                        else:
+                            balances[symbol] = "0"
                 return BalanceResult(balances=balances)
 
             return _get_balance
