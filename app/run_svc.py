@@ -9,8 +9,9 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.globals import set_debug, set_verbose
-from langchain_community.tools.tavily_search import TavilySearchResults
-from langchain_openai.chat_models import ChatOpenAI
+from langchain_community.tools.google_search import GoogleSearchResults
+from langchain_community.utilities.google_search import GoogleSearchAPIWrapper
+from langchain_openai.chat_models import AzureChatOpenAI
 from langchain_experimental.tools import PythonAstREPLTool
 from solana.rpc.async_api import AsyncClient
 
@@ -81,11 +82,13 @@ async def main():
     python_tool = PythonAstREPLTool(
         metadata={"notification": "\n*Running Python code...*\n"},
     )
-    tavily_tool = TavilySearchResults(
-        metadata={"notification": "\n*Searching data on Tavily Search Engine...*\n"},
+    google_tool = GoogleSearchResults(
+        num_results=8,
+        api_wrapper=GoogleSearchAPIWrapper(),
+        metadata={"notification": "\n*Searching from Google...*\n"},
     )
 
-    agent_model = ChatOpenAI(**model_config.agent_args.model_dump())
+    agent_model = AzureChatOpenAI(**model_config.agent_args.model_dump())
     chatter = Chatter(
         model=agent_model,
         tools=[
@@ -96,7 +99,7 @@ async def main():
             swap_tx_builder.tool(),
             price_querier.tool(),
             python_tool,
-            tavily_tool,
+            google_tool,
         ],
     )
 

@@ -4,9 +4,9 @@ from config.base import BaseConfig
 
 
 class ModelArgs(BaseModel):
-    model: str = Field("gpt-4", alias="model_name")
+    azure_deployment: str = "web3-agent"
     temperature: float = 0
-    streaming: bool = False
+    streaming: bool = True
 
 
 class ModelConfig(BaseConfig):
